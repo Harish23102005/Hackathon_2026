@@ -1,0 +1,296 @@
+/* ═══════════════════════════════════════════════════
+   NavbarComponent Styles — SereneStay
+   Refined Luxury / Warm Minimal aesthetic
+   Fonts: Cormorant Garamond (logo) + Jost (nav)
+═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@300;400;500&display=swap');
+
+/* ── Host ─────────────────────────────────────────── */
+:host {
+  display: block;
+}
+
+/* ── Variables ────────────────────────────────────── */
+:host {
+  --teal:       #2a8f84;
+  --teal-dark:  #1e6f67;
+  --teal-light: #eaf4f3;
+  --ink:        #192827;
+  --ink-mid:    #3d5250;
+  --muted:      #7a9190;
+  --border:     #ddeae9;
+  --bg:         #ffffff;
+  --nav-h:      64px;
+  --radius:     8px;
+  --transition: 0.22s ease;
+}
+
+/* ── Navbar Shell ─────────────────────────────────── */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 20px rgba(42, 143, 132, 0.07);
+  transition: box-shadow var(--transition), background var(--transition);
+  font-family: 'Jost', sans-serif;
+}
+
+.navbar.scrolled {
+  box-shadow: 0 4px 30px rgba(42, 143, 132, 0.14);
+}
+
+.navbar__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  height: var(--nav-h);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* ── Logo ─────────────────────────────────────────── */
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--teal);
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+
+.navbar__logo:hover { color: var(--teal-dark); }
+
+.logo-icon {
+  display: flex;
+  align-items: center;
+  color: var(--teal);
+}
+
+/* ── Desktop Nav ──────────────────────────────────── */
+.navbar__nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar__links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--ink-mid);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius);
+  position: relative;
+  transition: color var(--transition), background var(--transition);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 60%;
+  height: 1.5px;
+  background: var(--teal);
+  border-radius: 2px;
+  transition: transform var(--transition);
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--teal);
+  background: var(--teal-light);
+}
+
+.nav-link.active::after,
+.nav-link:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* ── Desktop Actions ──────────────────────────────── */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.btn-list-property {
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-mid);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius);
+  letter-spacing: 0.02em;
+  transition: color var(--transition), background var(--transition);
+}
+
+.btn-list-property:hover {
+  color: var(--teal);
+  background: var(--teal-light);
+}
+
+.btn-signin {
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--teal);
+  padding: 0.5rem 1.35rem;
+  border-radius: var(--radius);
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(42, 143, 132, 0.25);
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.btn-signin:hover {
+  background: var(--teal-dark);
+  box-shadow: 0 4px 16px rgba(42, 143, 132, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ── Hamburger ────────────────────────────────────── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-left: auto;
+  border-radius: var(--radius);
+  transition: background var(--transition);
+}
+
+.hamburger:hover { background: var(--teal-light); }
+
+.hamburger__bar {
+  display: block;
+  width: 22px;
+  height: 1.8px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition), width var(--transition);
+  transform-origin: center;
+}
+
+.hamburger.open .hamburger__bar:nth-child(1) {
+  transform: translateY(6.8px) rotate(45deg);
+}
+.hamburger.open .hamburger__bar:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+.hamburger.open .hamburger__bar:nth-child(3) {
+  transform: translateY(-6.8px) rotate(-45deg);
+}
+
+/* ── Mobile Menu ──────────────────────────────────── */
+.mobile-menu {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  background: var(--bg);
+  border-top: 1px solid transparent;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+}
+
+.mobile-menu.open {
+  max-height: 420px;
+  opacity: 1;
+  border-top-color: var(--border);
+}
+
+.mobile-menu__links {
+  list-style: none;
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.mobile-link {
+  display: block;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--ink-mid);
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius);
+  letter-spacing: 0.02em;
+  transition: color var(--transition), background var(--transition);
+}
+
+.mobile-link:hover,
+.mobile-link.active {
+  color: var(--teal);
+  background: var(--teal-light);
+}
+
+.mobile-link--subtle { color: var(--muted); }
+
+.mobile-link--cta {
+  margin-top: 0.25rem;
+  color: #fff !important;
+  background: var(--teal) !important;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(42, 143, 132, 0.2);
+}
+
+.mobile-link--cta:hover {
+  background: var(--teal-dark) !important;
+}
+
+.mobile-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.5rem 0;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar__nav,
+  .navbar__actions {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar__inner {
+    padding: 0 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar__logo {
+    font-size: 1.25rem;
+  }
+}
