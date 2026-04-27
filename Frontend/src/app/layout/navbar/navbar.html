@@ -1,0 +1,83 @@
+<header class="navbar" [class.scrolled]="isScrolled">
+  <div class="navbar__inner">
+
+    <!-- Logo -->
+    <a routerLink="/" class="navbar__logo" (click)="closeMenu()">
+      <span class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"
+                stroke="currentColor" stroke-width="1.4"/>
+          <path d="M11 6v5l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      SereneStay
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <nav class="navbar__nav" aria-label="Main navigation">
+      <ul class="navbar__links">
+        <li *ngFor="let link of navLinks">
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="nav-link"
+          >
+            {{ link.label }}
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Desktop Actions -->
+    <div class="navbar__actions">
+      <a routerLink="/list-property" class="btn-list-property">List Property</a>
+      <a routerLink="/signin" class="btn-signin">Sign In</a>
+    </div>
+
+    <!-- Hamburger (mobile) -->
+    <button
+      class="hamburger"
+      [class.open]="isMenuOpen"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="isMenuOpen"
+      aria-label="Toggle navigation menu"
+    >
+      <span class="hamburger__bar"></span>
+      <span class="hamburger__bar"></span>
+      <span class="hamburger__bar"></span>
+    </button>
+
+  </div>
+
+  <!-- Mobile Menu -->
+  <div
+    class="mobile-menu"
+    [class.open]="isMenuOpen"
+    [attr.aria-hidden]="!isMenuOpen"
+  >
+    <ul class="mobile-menu__links">
+      <li *ngFor="let link of navLinks">
+        <a
+          [routerLink]="link.path"
+          routerLinkActive="active"
+          class="mobile-link"
+          (click)="closeMenu()"
+        >
+          {{ link.label }}
+        </a>
+      </li>
+      <li class="mobile-divider"></li>
+      <li>
+        <a routerLink="/list-property" class="mobile-link mobile-link--subtle" (click)="closeMenu()">
+          List Property
+        </a>
+      </li>
+      <li>
+        <a routerLink="/signin" class="mobile-link mobile-link--cta" (click)="closeMenu()">
+          Sign In
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
