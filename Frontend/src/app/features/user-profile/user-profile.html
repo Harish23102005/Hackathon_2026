@@ -1,0 +1,211 @@
+<div class="profile-page">
+  <!-- Header -->
+  <header class="top-header">
+    <div class="header-content">
+      <div class="brand">SereneStay</div>
+      <nav class="nav-links">
+        <a href="#">Explore</a>
+        <a href="#">Destinations</a>
+        <a href="#">Trips</a>
+        <a href="#">Support</a>
+      </nav>
+      <div class="header-actions">
+        <a href="#" class="list-property">List Property</a>
+        <button class="sign-in-btn">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Profile Header -->
+  <section class="profile-header">
+    <div class="profile-container">
+      <div class="profile-card">
+        <img [src]="userAvatar" [alt]="userName" class="profile-avatar" />
+        <div class="profile-info">
+          <h1>{{ userName }}</h1>
+          <p class="profile-email">{{ userEmail }}</p>
+          <p class="profile-phone">{{ userPhone }}</p>
+          <p class="member-since">Member since {{ memberSince }}</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number">{{ totalBookings }}</span>
+          <span class="stat-label">Total Bookings</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">${{ totalSpent.toFixed(2) }}</span>
+          <span class="stat-label">Total Spent</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">{{ getActiveBookings().length }}</span>
+          <span class="stat-label">Active Bookings</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="profile-main">
+    <div class="profile-container">
+      <!-- Tabs -->
+      <div class="tabs-section">
+        <button 
+          *ngFor="let tab of tabs"
+          class="tab-btn"
+          [class.active]="activeTab === tab"
+          (click)="switchTab(tab)">
+          <span *ngIf="tab === 'active'">📋 Active Bookings ({{ getActiveBookings().length }})</span>
+          <span *ngIf="tab === 'history'">📄 Booking History ({{ getCompletedBookings().length }})</span>
+        </button>
+      </div>
+
+      <!-- Bookings List -->
+      <div class="bookings-section">
+        <!-- Active Bookings Tab -->
+        <div *ngIf="activeTab === 'active'" class="bookings-list">
+          <div *ngIf="getActiveBookings().length === 0" class="empty-state">
+            <p class="empty-icon">✈️</p>
+            <p class="empty-title">No Active Bookings</p>
+            <p class="empty-desc">Start your next adventure by exploring our properties.</p>
+            <a href="#" class="empty-cta">Browse Destinations</a>
+          </div>
+
+          <div *ngFor="let booking of getActiveBookings()" class="booking-card">
+            <div class="booking-image-wrapper">
+              <img [src]="booking.image" [alt]="booking.hotelName" class="booking-image" />
+              <span [class]="'booking-status ' + getStatusBadgeClass(booking.status)">
+                {{ getStatusText(booking.status) }}
+              </span>
+            </div>
+
+            <div class="booking-content">
+              <div class="booking-header">
+                <div>
+                  <h3>{{ booking.hotelName }}</h3>
+                  <p class="booking-location">📍 {{ booking.location }}</p>
+                </div>
+                <div class="booking-rating">
+                  <span class="rating">⭐ {{ booking.rating }}</span>
+                </div>
+              </div>
+
+              <div class="booking-details-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Check-in</span>
+                  <span class="detail-value">{{ booking.checkInDate }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Check-out</span>
+                  <span class="detail-value">{{ booking.checkOutDate }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Duration</span>
+                  <span class="detail-value">{{ booking.nights }} nights</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Room Type</span>
+                  <span class="detail-value">{{ booking.roomType }}</span>
+                </div>
+              </div>
+
+              <div class="booking-footer">
+                <div class="booking-price">
+                  <span class="price-label">Total Price</span>
+                  <span class="price-value">${{ booking.totalPrice.toFixed(2) }}</span>
+                </div>
+                <div class="booking-confirmation">
+                  <span class="conf-label">Confirmation: {{ booking.bookingConfirmationId }}</span>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <button class="action-btn primary-action" (click)="modifyBooking(booking.id)">Modify Booking</button>
+                <button class="action-btn secondary-action" (click)="cancelBooking(booking.id)">Cancel Booking</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Tab -->
+        <div *ngIf="activeTab === 'history'" class="bookings-list">
+          <div *ngIf="getCompletedBookings().length === 0" class="empty-state">
+            <p class="empty-icon">📝</p>
+            <p class="empty-title">No Booking History</p>
+            <p class="empty-desc">Your past bookings will appear here.</p>
+          </div>
+
+          <div *ngFor="let booking of getCompletedBookings()" class="booking-card history-card">
+            <div class="booking-image-wrapper">
+              <img [src]="booking.image" [alt]="booking.hotelName" class="booking-image" />
+              <span [class]="'booking-status ' + getStatusBadgeClass(booking.status)">
+                {{ getStatusText(booking.status) }}
+              </span>
+            </div>
+
+            <div class="booking-content">
+              <div class="booking-header">
+                <div>
+                  <h3>{{ booking.hotelName }}</h3>
+                  <p class="booking-location">📍 {{ booking.location }}</p>
+                </div>
+                <div class="booking-rating">
+                  <span class="rating">⭐ {{ booking.rating }}</span>
+                </div>
+              </div>
+
+              <div class="booking-details-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Check-in</span>
+                  <span class="detail-value">{{ booking.checkInDate }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Check-out</span>
+                  <span class="detail-value">{{ booking.checkOutDate }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Duration</span>
+                  <span class="detail-value">{{ booking.nights }} nights</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Room Type</span>
+                  <span class="detail-value">{{ booking.roomType }}</span>
+                </div>
+              </div>
+
+              <div class="booking-footer">
+                <div class="booking-price">
+                  <span class="price-label">Total Price</span>
+                  <span class="price-value">${{ booking.totalPrice.toFixed(2) }}</span>
+                </div>
+                <div class="booking-confirmation">
+                  <span class="conf-label">Confirmation: {{ booking.bookingConfirmationId }}</span>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <button class="action-btn download-action" (click)="downloadReceipt(booking.id)">📥 Download Receipt</button>
+                <button class="action-btn rebook-action">🔄 Rebook Same Property</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">SereneStay</div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+        <a href="#">Contact Us</a>
+      </div>
+      <p class="footer-copyright">© 2024 SereneStay Hospitality. All rights reserved.</p>
+    </div>
+  </footer>
+</div>
