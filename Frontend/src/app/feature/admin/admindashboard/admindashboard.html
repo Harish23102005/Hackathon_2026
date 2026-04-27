@@ -1,0 +1,104 @@
+<div class="page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Platform Overview</h1>
+      <p class="page-subtitle">Welcome back. Here is what's happening with your properties today.</p>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+    <div class="stat-card" *ngFor="let card of statCards">
+      <div class="stat-card__top">
+        <div class="stat-icon">
+          <!-- Building -->
+          <svg *ngIf="card.icon==='building'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 22V12h6v10M3 9h18"/></svg>
+          <!-- Bed -->
+          <svg *ngIf="card.icon==='bed'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4"/><path d="M2 17h20"/></svg>
+          <!-- Calendar -->
+          <svg *ngIf="card.icon==='calendar'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <!-- Check circle -->
+          <svg *ngIf="card.icon==='check'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <span class="stat-badge" [class.stable]="card.change==='Stable'">{{ card.change }}</span>
+      </div>
+      <p class="stat-label">{{ card.label }}</p>
+      <p class="stat-value">{{ card.value }}</p>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="content-row">
+
+    <!-- Recent Bookings -->
+    <div class="bookings-card">
+      <div class="bookings-card__header">
+        <h2 class="section-title">Recent Bookings</h2>
+        <div class="btn-group">
+          <button class="btn btn--outline">Export CSV</button>
+          <button class="btn btn--primary">View All</button>
+        </div>
+      </div>
+
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Guest Name</th>
+            <th>Hotel</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
+            <th>Status</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of recentBookings">
+            <td>
+              <div class="guest">
+                <span class="avatar" [style.background]="b.color">{{ b.initials }}</span>
+                <span class="guest-name">{{ b.guestName }}</span>
+              </div>
+            </td>
+            <td class="hotel-name">{{ b.hotel }}</td>
+            <td>{{ b.checkIn }}</td>
+            <td>{{ b.checkOut }}</td>
+            <td><span class="status-badge" [class]="getStatusClass(b.status)">{{ b.status }}</span></td>
+            <td class="amount">{{ b.amount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Revenue Sidebar -->
+    <div class="revenue-col">
+      <div class="revenue-card">
+        <p class="revenue-label">Estimated Revenue</p>
+        <p class="revenue-amount">$248.5k</p>
+        <div class="revenue-change">
+          <span class="revenue-badge">+18.2%</span>
+          <span class="revenue-note">from last month</span>
+        </div>
+      </div>
+
+      <div class="region-card">
+        <div class="region-card__header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Top Performing Region</span>
+        </div>
+        <div class="map-placeholder">
+          <div class="map-grid"></div>
+          <div class="map-circle map-circle--lg"></div>
+          <div class="map-circle map-circle--sm"></div>
+        </div>
+        <div class="region-footer">
+          <span class="region-name">Central Europe</span>
+          <span class="region-pct">92% Occupancy</span>
+        </div>
+        <div class="region-bar"><div class="region-bar__fill"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
