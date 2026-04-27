@@ -1,101 +1,90 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { catchError, EMPTY, tap } from 'rxjs';
+import { HotelService } from '../../core/services/hotel.service';
+import { Hotel } from '../../shared/models/hotel.model';
 
 @Component({
   selector: 'app-hotels',
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule, CommonModule, RouterModule],
   templateUrl: './hotels.html',
   styleUrl: './hotels.css',
 })
-export class Hotels {
+export class Hotels implements OnInit {
   currentView: 'grid' | 'map' = 'grid';
-  currentPage = 1;
-  priceRange = [0, 1000];
-  selectedAmenities = new Set<string>();
-
-  properties = [
-    {
-      id: 1,
-      name: 'Azure Horizon Suites',
-      location: 'Oia, Santorini',
-      image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      rating: 4.9,
-      price: 420,
-      originalPrice: 500,
-      discount: null,
-      amenities: ['WiFi', 'Pool', 'Gym'],
-      isFavorite: false
-    },
-    {
-      id: 2,
-      name: 'Caldera Echo Retreat',
-      location: 'Imerovigli, Santorini',
-      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      rating: 4.7,
-      price: 315,
-      originalPrice: 350,
-      discount: null,
-      amenities: ['WiFi', 'Spa', 'Dining'],
-      isFavorite: false
-    },
-    {
-      id: 3,
-      name: 'Villas of Thira',
-      location: 'Fira, Santorini',
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      rating: 4.8,
-      price: 280,
-      originalPrice: 350,
-      discount: '15% OFF',
-      amenities: ['WiFi', 'A/C', 'Parking'],
-      isFavorite: false
-    },
-    {
-      id: 4,
-      name: 'Infinity Blue Resort',
-      location: 'Akrotiri, Santorini',
-      image: 'https://images.unsplash.com/photo-1455263511159-7bccfb0055e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      rating: 4.6,
-      price: 385,
-      originalPrice: 420,
-      discount: null,
-      amenities: ['Pool', 'Private', 'Gym'],
-      isFavorite: false
-    }
-  ];
+  searchLocation = '';
+  isLoading = false;
+  error = '';
+  properties: Hotel[] = [];
+  filteredProperties: Hotel[] = [];
 
   amenitiesList = ['Free Wi-Fi', 'Swimming Pool', 'Fitness Center', 'Spa & Wellness', 'Restaurant'];
 
-  toggleAmenity(amenity: string): void {
-    if (this.selectedAmenities.has(amenity)) {
-      this.selectedAmenities.delete(amenity);
-    } else {
-      this.selectedAmenities.add(amenity);
+  private hotelService = inject(HotelService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
+
+  ngOnInit(): void {
+    const loc = this.route.snapshot.queryParams['location'];
+    if (loc) { this.searchLocation = loc; }
+    this.loadHotels();
+  }
+
+  loadHotels(): void {
+    this.isLoading = true;
+    this.error = '';
+
+    this.hotelService.getHotels().pipe(
+      tap(hotels => {
+        this.properties = hotels ?? [];
+        this.filteredProperties = hotels ?? [];
+        if (this.searchLocation.trim()) {
+          this.applyFilter();
+        }
+        this.isLoading = false;
+      }),
+      catchError(err => {
+        console.error('Hotel fetch error:', err);
+        this.error = `Failed to load hotels (${err.status ?? 'Network error'}). Is the backend running on port 5013?`;
+        this.filteredProperties = [];
+        this.isLoading = false;
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+  }
+
+  applyFilter(): void {
+    if (!this.searchLocation.trim()) {
+      this.filteredProperties = this.properties;
+      return;
     }
+    const q = this.searchLocation.toLowerCase();
+    this.filteredProperties = this.properties.filter(h =>
+      h.location.toLowerCase().includes(q) ||
+      h.hotelName.toLowerCase().includes(q) ||
+      h.address?.toLowerCase().includes(q)
+    );
   }
 
-  isAmenitySelected(amenity: string): boolean {
-    return this.selectedAmenities.has(amenity);
+  searchHotels(): void {
+    this.applyFilter();
   }
 
-  toggleFavorite(property: any): void {
-    property.isFavorite = !property.isFavorite;
+  viewRooms(hotel: Hotel): void {
+    this.router.navigate(['/rooms'], { queryParams: { hotelId: hotel.hotelId } });
   }
 
   switchView(view: 'grid' | 'map'): void {
     this.currentView = view;
   }
 
-  applyFilters(): void {
-    console.log('Filters applied', {
-      priceRange: this.priceRange,
-      amenities: Array.from(this.selectedAmenities)
-    });
-  }
-
   resetFilters(): void {
-    this.priceRange = [0, 1000];
-    this.selectedAmenities.clear();
+    this.searchLocation = '';
+    this.filteredProperties = this.properties;
   }
 }

@@ -1,0 +1,80 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo">
+        <span class="logo-icon">🏨</span>
+        <span class="logo-text">StayLux</span>
+      </div>
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-subtitle">Sign in to your account to continue</p>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()">
+      <div *ngIf="error" class="alert alert-error">
+        <span>⚠️ {{ error }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input
+            id="email"
+            type="email"
+            class="form-input"
+            placeholder="you@example.com"
+            [(ngModel)]="email"
+            name="email"
+            autocomplete="email"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input
+            id="password"
+            type="password"
+            class="form-input"
+            placeholder="Enter your password"
+            [(ngModel)]="password"
+            name="password"
+            autocomplete="current-password"
+          />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading" id="login-submit-btn">
+        <span *ngIf="isLoading" class="spinner"></span>
+        <span>{{ isLoading ? 'Signing in...' : 'Sign In' }}</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/register" class="auth-link">Create one</a></p>
+    </div>
+  </div>
+
+  <div class="auth-visual">
+    <div class="visual-content">
+      <h2>Discover Luxury Stays</h2>
+      <p>Find and book the world's finest hotels with just a few clicks.</p>
+      <div class="visual-stats">
+        <div class="stat">
+          <span class="stat-value">500+</span>
+          <span class="stat-label">Hotels</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">50K+</span>
+          <span class="stat-label">Happy Guests</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">4.9★</span>
+          <span class="stat-label">Rating</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

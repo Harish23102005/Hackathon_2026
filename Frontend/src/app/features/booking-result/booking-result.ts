@@ -1,54 +1,71 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { catchError, EMPTY, switchMap } from 'rxjs';
+import { BookingService } from '../../core/services/booking.service';
+import { Booking } from '../../shared/models/booking.model';
 
 @Component({
   selector: 'app-booking-result',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './booking-result.html',
   styleUrl: './booking-result.css',
 })
-export class BookingResult {
-  bookingId = 'BK-2024-7892156';
-  bookingDate = 'April 27, 2024';
-  status = 'Confirmed';
-
-  guestName = 'John Doe';
-  guestEmail = 'john.doe@example.com';
-  guestPhone = '+1 555-0123';
-
-  hotelName = 'Azure Bay Luxury Suites';
-  hotelLocation = 'Santorini, Greece';
-  hotelImage = 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60';
-  hotelRating = 4.9;
-
-  checkInDate = 'October 24, 2024';
-  checkOutDate = 'October 29, 2024';
-  nights = 5;
-  roomType = 'Deluxe Ocean View';
-  roomImage = 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60';
-
-  roomPrice = 1250.0;
-  serviceFee = 45.0;
-  taxes = 117.5;
-  totalPrice = 1412.5;
-
-  amenities = ['High-speed Wi-Fi', 'Ocean View', 'Private Balcony', 'Spa Access', 'Daily Housekeeping'];
+export class BookingResult implements OnInit {
+  booking: Booking | null = null;
+  isLoading = true;
+  error = '';
 
   confirmationItems = [
     { icon: '📬', label: 'Confirmation email sent', desc: 'Check your inbox for booking details' },
-    { icon: '🔑', label: 'Check-in available', desc: 'From 3:00 PM on Oct 24' },
+    { icon: '🔑', label: 'Check-in available', desc: 'From 3:00 PM on your check-in date' },
     { icon: '✈️', label: 'Travel insurance', desc: 'Optional coverage available' }
   ];
 
-  downloadConfirmation(): void {
-    console.log('Downloading confirmation for booking:', this.bookingId);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private bookingService = inject(BookingService);
+  private destroyRef = inject(DestroyRef);
+
+  ngOnInit(): void {
+    this.route.queryParams.pipe(
+      switchMap(params => {
+        const bookingId = +params['bookingId'] || 0;
+        this.isLoading = true;
+        this.error = '';
+
+        if (!bookingId) {
+          this.error = 'No booking ID provided.';
+          this.isLoading = false;
+          return EMPTY;
+        }
+
+        return this.bookingService.getBookingById(bookingId);
+      }),
+      catchError(() => {
+        this.error = 'Could not load booking details.';
+        this.isLoading = false;
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(booking => {
+      this.booking = booking;
+      this.isLoading = false;
+    });
   }
 
-  viewItinerary(): void {
-    console.log('Viewing itinerary for booking:', this.bookingId);
+  get nights(): number {
+    if (!this.booking) return 0;
+    const diff = new Date(this.booking.checkOutDate).getTime() - new Date(this.booking.checkInDate).getTime();
+    return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)));
   }
 
   returnHome(): void {
-    console.log('Returning home');
+    this.router.navigate(['/']);
+  }
+
+  goToProfile(): void {
+    this.router.navigate(['/user-profile']);
   }
 }

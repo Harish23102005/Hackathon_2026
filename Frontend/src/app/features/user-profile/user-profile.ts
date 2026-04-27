@@ -1,151 +1,103 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-
-interface Booking {
-  id: string;
-  hotelName: string;
-  location: string;
-  image: string;
-  rating: number;
-  checkInDate: string;
-  checkOutDate: string;
-  nights: number;
-  roomType: string;
-  totalPrice: number;
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
-  bookingConfirmationId: string;
-}
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterModule } from '@angular/router';
+import { catchError, EMPTY, tap } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
+import { BookingService } from '../../core/services/booking.service';
+import { getUserIdFromJwt, getNameFromJwt } from '../../core/utils/jwt.util';
+import { Booking } from '../../shared/models/booking.model';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })
-export class UserProfile {
+export class UserProfile implements OnInit {
   // User Information
-  userName = 'John Doe';
-  userEmail = 'john.doe@example.com';
-  userPhone = '+1 555-0123';
-  userAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=John';
-  memberSince = 'January 2023';
-  totalBookings = 8;
-  totalSpent = 12450.75;
+  userName = '';
+  userId = 0;
+  isLoading = true;
+  error = '';
 
   // Bookings
-  bookings: Booking[] = [
-    {
-      id: '1',
-      hotelName: 'Azure Bay Luxury Suites',
-      location: 'Santorini, Greece',
-      image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      rating: 4.9,
-      checkInDate: 'October 24, 2024',
-      checkOutDate: 'October 29, 2024',
-      nights: 5,
-      roomType: 'Deluxe Ocean View',
-      totalPrice: 1412.50,
-      status: 'upcoming',
-      bookingConfirmationId: 'BK-2024-7892156'
-    },
-    {
-      id: '2',
-      hotelName: 'Forest Whisper Lodge',
-      location: 'Bali, Indonesia',
-      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      rating: 4.8,
-      checkInDate: 'September 10, 2024',
-      checkOutDate: 'September 17, 2024',
-      nights: 7,
-      roomType: 'Eco-Luxury Villa',
-      totalPrice: 2145.00,
-      status: 'completed',
-      bookingConfirmationId: 'BK-2024-6524891'
-    },
-    {
-      id: '3',
-      hotelName: 'The Azure Retreat',
-      location: 'Santorini, Greece',
-      image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      rating: 4.7,
-      checkInDate: 'August 1, 2024',
-      checkOutDate: 'August 8, 2024',
-      nights: 7,
-      roomType: 'Premium Suite',
-      totalPrice: 1890.25,
-      status: 'completed',
-      bookingConfirmationId: 'BK-2024-5432167'
-    },
-    {
-      id: '4',
-      hotelName: 'Chateau Belle-Vue',
-      location: 'Provence, France',
-      image: 'https://images.unsplash.com/photo-1502472099602-708ce21667a4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      rating: 5.0,
-      checkInDate: 'July 15, 2024',
-      checkOutDate: 'July 22, 2024',
-      nights: 7,
-      roomType: 'Presidential Suite',
-      totalPrice: 3200.00,
-      status: 'completed',
-      bookingConfirmationId: 'BK-2024-4321098'
-    }
-  ];
-
+  bookings: Booking[] = [];
   tabs: ('active' | 'history')[] = ['active', 'history'];
   activeTab: 'active' | 'history' = 'active';
 
-  getStatusBadgeClass(status: string): string {
-    switch (status) {
-      case 'upcoming':
-        return 'status-upcoming';
-      case 'ongoing':
-        return 'status-ongoing';
-      case 'completed':
-        return 'status-completed';
-      case 'cancelled':
-        return 'status-cancelled';
-      default:
-        return '';
+  private bookingService = inject(BookingService);
+  private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
+
+  ngOnInit(): void {
+    const token = this.authService.getToken();
+    if (token) {
+      this.userId = getUserIdFromJwt(token);
+      this.userName = getNameFromJwt(token);
     }
+
+    if (!this.userId) {
+      this.isLoading = false;
+      return;
+    }
+
+    this.bookingService.getBookingsByUser(this.userId).pipe(
+      tap(bookings => {
+        this.bookings = bookings ?? [];
+        this.isLoading = false;
+      }),
+      catchError(err => {
+        this.error = `Could not load bookings (${err.status ?? 'network error'}).`;
+        this.isLoading = false;
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'upcoming':
-        return 'Upcoming';
-      case 'ongoing':
-        return 'Ongoing';
-      case 'completed':
-        return 'Completed';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
+  get totalBookings(): number { return this.bookings.length; }
+
+  get totalSpent(): number {
+    return this.bookings.reduce((s, b) => s + b.totalAmount, 0);
   }
 
   getActiveBookings(): Booking[] {
-    return this.bookings.filter(b => b.status === 'upcoming' || b.status === 'ongoing');
+    return this.bookings.filter(b => b.bookingStatus === 'Confirmed' || b.bookingStatus === 'Pending');
   }
 
   getCompletedBookings(): Booking[] {
-    return this.bookings.filter(b => b.status === 'completed' || b.status === 'cancelled');
+    return this.bookings.filter(b => b.bookingStatus === 'Cancelled' || b.bookingStatus === 'Completed');
   }
 
   switchTab(tab: 'active' | 'history'): void {
     this.activeTab = tab;
   }
 
-  cancelBooking(bookingId: string): void {
-    console.log('Cancelling booking:', bookingId);
+  cancelBooking(bookingId: number): void {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+    this.bookingService.cancelBooking(bookingId).pipe(
+      tap(() => {
+        this.bookings = this.bookings.filter(b => b.bookingId !== bookingId);
+      }),
+      catchError(() => { alert('Failed to cancel booking.'); return EMPTY; }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
-  modifyBooking(bookingId: string): void {
-    console.log('Modifying booking:', bookingId);
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'Confirmed': return 'status-upcoming';
+      case 'Pending':   return 'status-ongoing';
+      case 'Completed': return 'status-completed';
+      case 'Cancelled': return 'status-cancelled';
+      default: return '';
+    }
   }
 
-  downloadReceipt(bookingId: string): void {
-    console.log('Downloading receipt for booking:', bookingId);
+  logout(): void {
+    this.authService.logout();
+    window.location.href = '/login';
   }
 }

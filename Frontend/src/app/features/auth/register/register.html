@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo">
+        <span class="logo-icon">🏨</span>
+        <span class="logo-text">StayLux</span>
+      </div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join thousands of travellers worldwide</p>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()">
+      <div *ngIf="error" class="alert alert-error">⚠️ {{ error }}</div>
+      <div *ngIf="success" class="alert alert-success">✅ {{ success }}</div>
+
+      <div class="form-group">
+        <label for="reg-name" class="form-label">Full Name <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input id="reg-name" type="text" class="form-input" placeholder="John Doe"
+                 [(ngModel)]="name" name="name" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reg-email" class="form-label">Email Address <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input id="reg-email" type="email" class="form-input" placeholder="you@example.com"
+                 [(ngModel)]="email" name="email" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reg-password" class="form-label">Password <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input id="reg-password" type="password" class="form-input" placeholder="Min. 8 characters"
+                 [(ngModel)]="password" name="password" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reg-phone" class="form-label">Phone Number</label>
+        <div class="input-wrapper">
+          <span class="input-icon">📱</span>
+          <input id="reg-phone" type="tel" class="form-input" placeholder="+91 55555 00000"
+                 [(ngModel)]="phoneNumber" name="phoneNumber" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reg-role" class="form-label">Account Type</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🎭</span>
+          <select id="reg-role" class="form-input form-select" [(ngModel)]="role" name="role">
+            <option value="Customer">Customer</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading" id="register-submit-btn">
+        <span *ngIf="isLoading" class="spinner"></span>
+        <span>{{ isLoading ? 'Creating account...' : 'Create Account' }}</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login" class="auth-link">Sign in</a></p>
+    </div>
+  </div>
+
+  <div class="auth-visual">
+    <div class="visual-content">
+      <h2>Your Perfect Stay Awaits</h2>
+      <p>Access exclusive deals on luxury hotels around the globe.</p>
+      <div class="visual-stats">
+        <div class="stat">
+          <span class="stat-value">Free</span>
+          <span class="stat-label">To Join</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">24/7</span>
+          <span class="stat-label">Support</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">100%</span>
+          <span class="stat-label">Secure</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

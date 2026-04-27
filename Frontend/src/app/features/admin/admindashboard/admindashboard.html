@@ -45,8 +45,9 @@
       <table class="bookings-table">
         <thead>
           <tr>
-            <th>Guest Name</th>
-            <th>Hotel</th>
+            <th>Booking ID</th>
+            <th>User ID</th>
+            <th>Room ID</th>
             <th>Check-in</th>
             <th>Check-out</th>
             <th>Status</th>
@@ -54,18 +55,24 @@
           </tr>
         </thead>
         <tbody>
+          <tr *ngIf="recentBookings.length === 0">
+            <td colspan="7" style="text-align:center; color:#64748b; padding: 24px;">
+              No bookings yet.
+            </td>
+          </tr>
           <tr *ngFor="let b of recentBookings">
             <td>
               <div class="guest">
-                <span class="avatar" [style.background]="b.color">{{ b.initials }}</span>
-                <span class="guest-name">{{ b.guestName }}</span>
+                <span class="avatar" style="background:#6366f1">#{{ b.bookingId }}</span>
+                <span class="guest-name">Booking #{{ b.bookingId }}</span>
               </div>
             </td>
-            <td class="hotel-name">{{ b.hotel }}</td>
-            <td>{{ b.checkIn }}</td>
-            <td>{{ b.checkOut }}</td>
-            <td><span class="status-badge" [class]="getStatusClass(b.status)">{{ b.status }}</span></td>
-            <td class="amount">{{ b.amount }}</td>
+            <td class="hotel-name">User #{{ b.userId }}</td>
+            <td>Room #{{ b.roomId }}</td>
+            <td>{{ b.checkInDate | date:'mediumDate' }}</td>
+            <td>{{ b.checkOutDate | date:'mediumDate' }}</td>
+            <td><span class="status-badge" [class]="getStatusClass(b.bookingStatus)">{{ b.bookingStatus }}</span></td>
+            <td class="amount">${{ b.totalAmount | number:'1.2-2' }}</td>
           </tr>
         </tbody>
       </table>

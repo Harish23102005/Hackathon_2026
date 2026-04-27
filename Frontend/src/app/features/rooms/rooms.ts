@@ -1,59 +1,100 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { catchError, EMPTY, forkJoin, of, switchMap, timeout } from 'rxjs';
+import { HotelService } from '../../core/services/hotel.service';
+import { RoomService } from '../../core/services/room.service';
+import { Hotel } from '../../shared/models/hotel.model';
+import { Room } from '../../shared/models/room.model';
 
 @Component({
   selector: 'app-rooms',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './rooms.html',
   styleUrl: './rooms.css',
 })
-export class Rooms {
-  hotelName = 'Azure Horizon Resort & Spa';
-  hotelLocation = 'Maldives, North Male Atoll';
-  hotelDescription = 'A sanctuary of sophisticated minimalism perched above turquoise waters, offering unparalleled tranquility and curated luxury.';
-  hotelRating = 4.9;
-  verifiedReviews = 2482;
+export class Rooms implements OnInit {
+  // ── Signals ────────────────────────────────────────────────────────────────
+  readonly hotel     = signal<Hotel | null>(null);
+  readonly rooms     = signal<Room[]>([]);
+  readonly isLoading = signal(true);
+  readonly error     = signal('');
+  readonly hotelId   = signal(0);
 
-  checkInDate = 'Oct 12';
-  checkOutDate = 'Oct 18';
-  guests = '2 Adults, 1 Room';
+  // ── Computed signals ──────────────────────────────────────────────────────
+  readonly hasRooms  = computed(() => this.rooms().length > 0);
+  readonly hotelName = computed(() => this.hotel()?.hotelName ?? 'Hotel');
 
-  rooms = [
-    {
-      id: 1,
-      name: 'Deluxe King Ocean View',
-      image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      area: 45,
-      bedType: 'King Bed',
-      amenities: ['AC', 'Smart TV', 'Minibar', 'High-speed Wi-Fi'],
-      availability: 'Available Now',
-      availabilityClass: 'available',
-      price: 450,
-      originalPrice: null
-    },
-    {
-      id: 2,
-      name: 'Executive Panorama Suite',
-      image: 'https://images.unsplash.com/photo-1578926078328-123b78f15f13?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      area: 68,
-      bedType: 'King Bed + Lounge',
-      amenities: ['Premium Bar', 'Spa Bath', 'Nespresso', 'Climate Control'],
-      availability: 'Only 2 Left',
-      availabilityClass: 'limited',
-      price: 890,
-      originalPrice: null
-    },
-    {
-      id: 3,
-      name: 'Azure Presidential Villa',
-      image: 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
-      area: 220,
-      bedType: 'Multiple Bedrooms',
-      amenities: ['Private Butler', 'In-Villa Dining', 'Home Cinema'],
-      availability: 'Available Now',
-      availabilityClass: 'available',
-      price: 1450,
-      originalPrice: null
-    }
-  ];
+  private route        = inject(ActivatedRoute);
+  private router       = inject(Router);
+  private roomService  = inject(RoomService);
+  private hotelService = inject(HotelService);
+  private destroyRef   = inject(DestroyRef);
+
+  ngOnInit(): void {
+    this.route.queryParams.pipe(
+      switchMap(params => {
+        this.hotelId.set(+params['hotelId'] || 0);
+        this.isLoading.set(true);
+        this.error.set('');
+        this.rooms.set([]);
+        this.hotel.set(null);
+
+        if (!this.hotelId()) {
+          this.error.set('No hotel selected. Please go back and choose a hotel.');
+          this.isLoading.set(false);
+          return EMPTY;
+        }
+
+        // Hotel fetch is NON-CRITICAL — if it fails we still show rooms
+        const hotel$ = this.hotelService.getHotelById(this.hotelId()).pipe(
+          timeout(8000),
+          catchError(() => of(null))   // hotel failure is non-fatal
+        );
+
+        // Rooms fetch is CRITICAL
+        const rooms$ = this.roomService.getRoomsByHotel(this.hotelId()).pipe(
+          timeout(8000),
+          catchError(err => {
+            this.error.set(`Could not load rooms (${err.name === 'TimeoutError' ? 'request timed out — is the backend running on port 5013?' : (err.status ?? 'network error')}).`);
+            return of([] as Room[]);
+          })
+        );
+
+        return forkJoin({ hotel: hotel$, rooms: rooms$ });
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: result => {
+        this.hotel.set(result.hotel);
+        this.rooms.set(result.rooms ?? []);
+        this.isLoading.set(false);
+      },
+      error: err => {
+        this.error.set(`Unexpected error: ${err.message ?? 'unknown'}`);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  bookRoom(room: Room): void {
+    this.router.navigate(['/bookings'], {
+      queryParams: { roomId: room.roomId, hotelId: this.hotelId() }
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/hotels']);
+  }
+
+  getRoomType(categoryId: number): string {
+    const types: Record<number, string> = {
+      1: 'Standard Room',
+      2: 'Deluxe Room',
+      3: 'Suite',
+      4: 'Presidential Suite'
+    };
+    return types[categoryId] ?? `Category ${categoryId}`;
+  }
 }

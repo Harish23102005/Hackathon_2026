@@ -295,7 +295,16 @@
 .card-image-wrapper {
   position: relative;
   overflow: hidden;
-  height: 280px;
+  height: 200px;
+  background: linear-gradient(135deg, #1565a7, #0d3b63);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image-placeholder {
+  font-size: 4rem;
+  opacity: 0.4;
 }
 
 .card-image {

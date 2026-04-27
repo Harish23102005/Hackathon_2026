@@ -3,8 +3,7 @@ export interface Room {
   roomId: number;
   hotelId: number;
   categoryId: number;
-  roomNumber: string;
+  roomNumber: number;   // int on backend (101, 102, 201...)
   pricePerNight: number;
   capacity: number;
-  isAvailable: boolean;
 }

@@ -1,176 +1,84 @@
-<div class="booking-result-page">
-  <!-- Header -->
-  <header class="top-header">
+<div class="result-page">
+  <header class="result-header">
     <div class="header-content">
-      <div class="brand">SereneStay</div>
-      <nav class="nav-links">
-        <a href="#">Explore</a>
-        <a href="#">Destinations</a>
-        <a href="#">Trips</a>
-        <a href="#">Support</a>
-      </nav>
-      <div class="header-actions">
-        <a href="#" class="list-property">List Property</a>
-        <button class="sign-in-btn">Sign In</button>
-      </div>
+      <div class="brand">StayLux</div>
     </div>
   </header>
 
-  <!-- Success Section -->
-  <section class="success-section">
-    <div class="success-container">
-      <div class="success-icon">✓</div>
-      <h1>Your Booking is Confirmed!</h1>
-      <p class="success-subtitle">Get ready for an unforgettable stay in paradise</p>
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner-lg"></div>
+    <p>Loading booking details...</p>
+  </div>
 
-      <!-- Booking ID Card -->
-      <div class="booking-id-card">
-        <div class="id-label">Booking Confirmation Number</div>
-        <div class="id-value">{{ bookingId }}</div>
-        <div class="id-date">Confirmed on {{ bookingDate }}</div>
-      </div>
+  <!-- Error -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <p class="empty-icon">⚠️</p>
+    <p>{{ error }}</p>
+    <button class="back-btn" (click)="returnHome()">Go Home</button>
+  </div>
 
-      <!-- Quick Info -->
-      <div class="quick-info">
-        <div class="info-item">
-          <span class="info-header">Guest</span>
-          <span class="info-value">{{ guestName }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-header">Check-in</span>
-          <span class="info-value">{{ checkInDate }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-header">Check-out</span>
-          <span class="info-value">{{ checkOutDate }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-header">Stay Duration</span>
-          <span class="info-value">{{ nights }} nights</span>
-        </div>
-      </div>
+  <!-- Success -->
+  <div *ngIf="booking && !isLoading" class="result-container">
+    <div class="success-banner">
+      <div class="success-icon">✅</div>
+      <h1>Booking Confirmed!</h1>
+      <p>Your reservation has been successfully placed.</p>
     </div>
-  </section>
 
-  <!-- Main Content -->
-  <main class="result-container">
-    <!-- Left: Itinerary -->
-    <div class="itinerary-section">
-      <!-- Hotel Card -->
-      <div class="result-card hotel-card">
-        <div class="hotel-image-wrapper">
-          <img [src]="hotelImage" [alt]="hotelName" class="hotel-image" />
-          <span class="rating-badge">⭐ {{ hotelRating }}</span>
-        </div>
-        <div class="hotel-details">
-          <h2>{{ hotelName }}</h2>
-          <p class="hotel-location">📍 {{ hotelLocation }}</p>
-          <div class="hotel-amenities">
-            <span *ngFor="let amenity of amenities" class="amenity">{{ amenity }}</span>
-          </div>
-        </div>
-      </div>
+    <div class="booking-details-card">
+      <h2>Booking Details</h2>
 
-      <!-- Room Details Card -->
-      <div class="result-card room-card">
-        <div class="room-image-wrapper">
-          <img [src]="roomImage" [alt]="roomType" class="room-image" />
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Booking ID</span>
+          <span class="detail-value">#{{ booking.bookingId }}</span>
         </div>
-        <div class="room-details">
-          <h3>{{ roomType }}</h3>
-          <div class="date-range">
-            <div class="date-item">
-              <span class="date-label">Check-in</span>
-              <span class="date-value">{{ checkInDate }}</span>
-            </div>
-            <div class="date-item">
-              <span class="date-label">Check-out</span>
-              <span class="date-value">{{ checkOutDate }}</span>
-            </div>
-          </div>
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+          <span class="detail-value status-confirmed">{{ booking.bookingStatus }}</span>
         </div>
-      </div>
-
-      <!-- Confirmation Items -->
-      <div class="confirmation-items">
-        <div *ngFor="let item of confirmationItems" class="confirmation-item">
-          <span class="item-icon">{{ item.icon }}</span>
-          <div class="item-content">
-            <p class="item-label">{{ item.label }}</p>
-            <p class="item-desc">{{ item.desc }}</p>
-          </div>
+        <div class="detail-item">
+          <span class="detail-label">Room ID</span>
+          <span class="detail-value">{{ booking.roomId }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Duration</span>
+          <span class="detail-value">{{ nights }} nights</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Check-in</span>
+          <span class="detail-value">{{ booking.checkInDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Check-out</span>
+          <span class="detail-value">{{ booking.checkOutDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Booked On</span>
+          <span class="detail-value">{{ booking.bookingDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Total Amount</span>
+          <span class="detail-value price">${{ booking.totalAmount | number:'1.2-2' }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Right: Summary & Actions -->
-    <aside class="summary-section">
-      <!-- Price Summary -->
-      <div class="summary-card">
-        <h3>Price Summary</h3>
-        <div class="summary-item">
-          <span>{{ roomType }} x {{ nights }} nights</span>
-          <span class="price">${{ roomPrice.toFixed(2) }}</span>
-        </div>
-        <div class="summary-item">
-          <span>Service fee</span>
-          <span class="price">${{ serviceFee.toFixed(2) }}</span>
-        </div>
-        <div class="summary-item">
-          <span>Taxes</span>
-          <span class="price">${{ taxes.toFixed(2) }}</span>
-        </div>
-        <div class="summary-divider"></div>
-        <div class="summary-total">
-          <span>Total Amount</span>
-          <span class="total-price">${{ totalPrice.toFixed(2) }}</span>
+    <!-- Confirmation items -->
+    <div class="confirmation-list">
+      <div *ngFor="let item of confirmationItems" class="confirmation-item">
+        <span class="conf-icon">{{ item.icon }}</span>
+        <div>
+          <p class="conf-label">{{ item.label }}</p>
+          <p class="conf-desc">{{ item.desc }}</p>
         </div>
       </div>
-
-      <!-- Guest Contact Info -->
-      <div class="summary-card contact-card">
-        <h3>Guest Information</h3>
-        <div class="contact-item">
-          <span class="contact-label">Name</span>
-          <span class="contact-value">{{ guestName }}</span>
-        </div>
-        <div class="contact-item">
-          <span class="contact-label">Email</span>
-          <span class="contact-value">{{ guestEmail }}</span>
-        </div>
-        <div class="contact-item">
-          <span class="contact-label">Phone</span>
-          <span class="contact-value">{{ guestPhone }}</span>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button class="btn btn-primary" (click)="viewItinerary()">📋 View Itinerary</button>
-        <button class="btn btn-secondary" (click)="downloadConfirmation()">📥 Download Confirmation</button>
-        <button class="btn btn-tertiary" (click)="returnHome()">← Back to Home</button>
-      </div>
-
-      <!-- Support Note -->
-      <div class="support-card">
-        <p class="support-title">Need Help?</p>
-        <p class="support-text">Our support team is available 24/7 to assist with your booking.</p>
-        <a href="#" class="support-link">Contact Support →</a>
-      </div>
-    </aside>
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-brand">SereneStay</div>
-      <div class="footer-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Cookie Policy</a>
-        <a href="#">Contact Us</a>
-      </div>
-      <p class="footer-copyright">© 2024 SereneStay Hospitality. All rights reserved.</p>
     </div>
-  </footer>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" (click)="goToProfile()" id="view-profile-btn">View My Bookings</button>
+      <button class="btn btn-secondary" (click)="returnHome()" id="go-home-btn">Back to Home</button>
+    </div>
+  </div>
 </div>

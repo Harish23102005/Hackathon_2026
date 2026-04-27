@@ -13,7 +13,6 @@ export interface LoginRequest {
 
 export interface AuthResponse {
   token: string;
-  
 }
 
 @Injectable({
@@ -30,6 +29,21 @@ export class AuthService {
       .pipe(
         tap((res) => {
           localStorage.setItem('token', res.token);
+          // Decode JWT payload to extract role and user id
+          try {
+            const payload = JSON.parse(atob(res.token.split('.')[1]));
+            // .NET uses the full ClaimTypes.Role URI or the short name depending on version
+            const role =
+              payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+              payload['role'] ||
+              payload['Role'] ||
+              '';
+            const id = payload['id'] || payload['nameid'] || '';
+            localStorage.setItem('userRole', role);
+            localStorage.setItem('userId', id.toString());
+          } catch {
+            // If decode fails we just won't have cached role
+          }
         })
       );
   }
@@ -42,7 +56,8 @@ export class AuthService {
   
   logout() {
     localStorage.removeItem('token');
-  
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
   }
 
  
@@ -53,5 +68,17 @@ export class AuthService {
   
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getUserRole(): string {
+    return localStorage.getItem('userRole') ?? '';
+  }
+
+  getUserId(): number {
+    return parseInt(localStorage.getItem('userId') ?? '0', 10);
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRole() === 'Admin';
   }
 }

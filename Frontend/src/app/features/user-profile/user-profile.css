@@ -93,11 +93,25 @@
 }
 
 .profile-avatar {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 4px 12px rgba(15, 45, 59, 0.12);
+}
+
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0f4e7c, #1a7ab5);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .profile-info h1 {
@@ -242,12 +256,8 @@
 .booking-card {
   background: white;
   border-radius: 14px;
-  overflow: hidden;
   box-shadow: 0 4px 12px rgba(15, 45, 59, 0.08);
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
-  padding: 20px;
+  padding: 20px 24px;
   transition: all 0.2s;
 }
 
@@ -275,15 +285,13 @@
 }
 
 .booking-status {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 6px 12px;
+  display: inline-block;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .status-upcoming {
