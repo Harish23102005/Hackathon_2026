@@ -18,9 +18,7 @@ export class AmenityService {
     return this.http.get<Amenity[]>(this.apiUrl);
   }
 
-  getAmenityById(id: number): Observable<Amenity> {
-    return this.http.get<Amenity>(`${this.apiUrl}/${id}`);
-  }
+
 
   
   addAmenity(amenity: Amenity): Observable<Amenity> {
@@ -28,9 +26,6 @@ export class AmenityService {
   }
 
 
-  updateAmenity(id: number, amenity: Amenity): Observable<Amenity> {
-    return this.http.patch<Amenity>(`${this.apiUrl}/${id}`, amenity);
-  }
 
 
   deleteAmenity(id: number): Observable<void> {
